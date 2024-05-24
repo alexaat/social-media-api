@@ -388,6 +388,41 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 		resp.Payload = user
 
+	} else if r.Method == "PATCH" {
+		user, e := getUserFromRequest(r)
+
+		if e != nil {
+			resp.Error = e
+			sendResponse(w, resp)
+			return
+		}
+
+		//details := strings.TrimSpace(r.FormValue("user"))
+
+		//fmt.Println(details)
+		fmt.Println("user", user)
+		data := strings.TrimSpace(r.FormValue("user"))
+
+		var details types.User
+		err := json.Unmarshal([]byte(data), &details)
+		if err != nil {
+			//Handle error
+			return
+		}
+		//Check that user changes own profile
+		if details.Id != user.Id {
+			//Handle error
+			return
+		}
+
+		err, num := db.UpdateUserDetails(details)
+		if err != nil {
+			//Handle error
+			return
+		}
+
+		resp.Payload = types.Updated{Updated: int(*num)}
+
 	} else {
 		resp.Error = &types.Error{Type: WRONG_METHOD, Message: "Error: wrong http method"}
 	}

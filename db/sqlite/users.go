@@ -189,6 +189,10 @@ func UpdateUser(user *types.User) error {
 	return nil
 }
 
+func UpdateUserDetails(user types.User) (error, *int64){
+	return nil, nil
+}
+
 func GetUserById(id int) (*types.User, error) {
 
 	query := `
