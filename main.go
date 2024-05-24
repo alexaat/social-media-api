@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"my-social-network/db/sqlite"
+	"os"
 	"strings"
 
 	"net/http"
@@ -20,7 +21,6 @@ func main() {
 		}
 	}
 
-	fmt.Println("Startig server at port 8080")
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/signin", signinHandler)
 	http.HandleFunc("/signup", signupHandler)
@@ -48,7 +48,12 @@ func main() {
 
 	http.HandleFunc("/ws", wsHandler)
 
-	http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Println("Starting server on port :" + port)
+	http.ListenAndServe(":"+port, nil)
 
 	defer db.Close()
 }
