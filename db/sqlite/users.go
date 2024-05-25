@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"fmt"
 	types "my-social-network/types"
 	util "my-social-network/util"
 	"strings"
@@ -189,8 +190,43 @@ func UpdateUser(user *types.User) error {
 	return nil
 }
 
-func UpdateUserDetails(user types.User) (error, *int64){
-	return nil, nil
+func UpdateUserDetails(id int, m map[string]string) (*int64, error) {
+
+	query := "UPDATE users SET "
+
+	values := make([]interface{}, 0)
+
+	for k, v := range m {
+		query += fmt.Sprintf("%v = ?, ", k)
+		values = append(values, v)
+	}
+	values = append(values, id)
+
+	query = strings.TrimSuffix(query, ", ")
+
+	query += " WHERE id = ?"
+
+	statement, err := db.Prepare(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer statement.Close()
+
+	result, err := statement.Exec(values...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	num, err := result.LastInsertId()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &num, nil
 }
 
 func GetUserById(id int) (*types.User, error) {

@@ -397,27 +397,67 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//details := strings.TrimSpace(r.FormValue("user"))
-
-		//fmt.Println(details)
-		fmt.Println("user", user)
-		data := strings.TrimSpace(r.FormValue("user"))
-
-		var details types.User
-		err := json.Unmarshal([]byte(data), &details)
+		m := make(map[string]string)
+		err := r.ParseForm()
 		if err != nil {
-			//Handle error
-			return
-		}
-		//Check that user changes own profile
-		if details.Id != user.Id {
-			//Handle error
+			resp.Error = &types.Error{Type: PARSE_ERROR, Message: fmt.Sprintf("Error: could parse form: %v", err)}
+			sendResponse(w, resp)
 			return
 		}
 
-		err, num := db.UpdateUserDetails(details)
+		for key, values := range r.PostForm {
+
+			val := values[0]
+
+			//Validation
+			if key == "nick_name" {
+				if len(val) != 0 && (len(val) < 2 || len(val) > 50) {
+					resp.Error = &types.Error{Type: INVALID_NICK_NAME_FORMAT, Message: "Error: Nickname should be between 2 and 50 characters long"}
+					sendResponse(w, resp)
+					return
+				}
+			}
+
+			if key == "first_name" {
+				if len(val) < 1 || len(val) > 50 {
+					resp.Error = &types.Error{Type: INVALID_FIRST_NAME_FORMAT, Message: "Error: First Name should be between 1 and 50 characters long"}
+					sendResponse(w, resp)
+					return
+				}
+			}
+			if key == "last_name" {
+				if len(val) < 1 || len(val) > 50 {
+					resp.Error = &types.Error{Type: INVALID_LAST_NAME_FORMAT, Message: "Error: Last Name should be between 1 and 50 characters long"}
+					sendResponse(w, resp)
+					return
+				}
+			}
+
+			if key == "email" {
+				reg := `^[^@\s]+@[^@\s]+\.[^@\s]+$`
+				match, err := regexp.MatchString(reg, val)
+				if err != nil || !match {
+					resp.Error = &types.Error{Type: INVALID_EMAIL, Message: "Error: invalid email"}
+					sendResponse(w, resp)
+					return
+				}
+			}
+
+			if key == "about_me" {
+				if len(val) > 5000 {
+					resp.Error = &types.Error{Type: INVALID_ABOUT_ME, Message: "Error: about me should be less than 5000 charachters"}
+					sendResponse(w, resp)
+					return
+				}
+			}
+
+			m[key] = val
+		}
+
+		num, err := db.UpdateUserDetails(user.Id, m)
 		if err != nil {
-			//Handle error
+			resp.Error = &types.Error{Type: DATABASE_ERROR, Message: fmt.Sprintf("Error: could not update user in database. %v", err)}
+			sendResponse(w, resp)
 			return
 		}
 
