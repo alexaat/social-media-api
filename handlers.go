@@ -357,37 +357,6 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-	} else if r.Method == "PUT" {
-
-		user, e := getUserFromRequest(r)
-
-		if e != nil {
-			resp.Error = e
-			sendResponse(w, resp)
-			return
-		}
-
-		privacy := strings.TrimSpace(r.FormValue("privacy"))
-		firstName := strings.TrimSpace(r.FormValue("first_name"))
-		lastName := strings.TrimSpace(r.FormValue("last_name"))
-
-		if privacy != "" {
-			user.Privacy = privacy
-		}
-		if firstName != "" {
-			user.FirstName = firstName
-		}
-		if lastName != "" {
-			user.LastName = lastName
-		}
-
-		err := db.UpdateUser(user)
-		if err != nil {
-			resp.Error = &types.Error{Type: DATABASE_ERROR, Message: "Error: could not update user in database"}
-		}
-
-		resp.Payload = user
-
 	} else if r.Method == "PATCH" {
 		user, e := getUserFromRequest(r)
 

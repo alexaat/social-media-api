@@ -148,48 +148,6 @@ func GetUserByEmailOrNickNameAndPassword(user types.User) (*types.User, error) {
 	return nil, nil
 }
 
-func UpdateUser(user *types.User) error {
-	query := `
-	UPDATE users
-	SET
-	first_name = ?,
-	last_name = ?,
-	date_of_birth = ?,
-	nick_name = ?,
-	email = ?,
-	password = ?,
-	about_me = ?,
-	avatar = ?,
-	privacy = ?
-	WHERE id = ?`
-
-	statement, err := db.Prepare(query)
-
-	if err != nil {
-		return err
-	}
-
-	defer statement.Close()
-
-	_, err = statement.Exec(
-		user.FirstName,
-		user.LastName,
-		user.DateOfBirth,
-		user.NickName,
-		user.Email,
-		user.Password,
-		user.AboutMe,
-		user.Avatar,
-		user.Privacy,
-		user.Id)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func UpdateUserDetails(id int, m map[string]string) (*int64, error) {
 
 	query := "UPDATE users SET "
