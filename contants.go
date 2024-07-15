@@ -1,6 +1,7 @@
 package main
 
-const clientOrigin = "http://localhost:3000"
+// const clientOrigin = "http://localhost:3000"
+const clientOrigin = "https://social-media-client-mvsc3n5cra-nw.a.run.app"
 
 const IMAGES_DIRECTORY = "images"
 
